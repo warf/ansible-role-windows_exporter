@@ -1,39 +1,46 @@
 ---
-
-- name: Check for Windows service IIS
-  ansible.windows.win_service:
-    name: w3svc
-  register: iis
-
-- name: Check for Windows service MSMQ
-  ansible.windows.win_service:
-    name: msmq
-  register: msmq
-
-- name: Check for Windows service ADDC
-  ansible.windows.win_service:
-    name: dns
-  register: addc
-
-- name: Check for Windows service MSSQL
-  ansible.windows.win_service:
-    name: mssqlserver
-  register: mssql
-
-- name: Check for Windows service ADCS
-  ansible.windows.win_service:
-    name: certsvc
-  register: adcs
-
-- name: Build host specific collectors based on service status
+- name: Initialize empty host specific collectors
   ansible.builtin.set_fact:
-    host_specific_collectors: "{{ [] +
-      (['iis'] if iis.exists and iis.state == 'running' else []) +
-      (['msmq'] if msmq.exists and msmq.state == 'running' else []) +
-      (['ad'] if addc.exists and addc.state == 'running' else []) +
-      (['adcs'] if adcs.exists and adcs.state == 'running' else []) +
-      (['mssql'] if mssql.exists and mssql.state == 'running' else []) }}"
-  register: host_specific_collectors_result
+    host_specific_collectors: []
+
+- name: Collect running services
+  when:
+    - windows_exporter_collect_services
+  block:
+    - name: Check for Windows service IIS
+      ansible.windows.win_service:
+        name: w3svc
+      register: iis
+
+    - name: Check for Windows service MSMQ
+      ansible.windows.win_service:
+        name: msmq
+      register: msmq
+
+    - name: Check for Windows service ADDC
+      ansible.windows.win_service:
+        name: dns
+      register: addc
+
+    - name: Check for Windows service MSSQL
+      ansible.windows.win_service:
+        name: mssqlserver
+      register: mssql
+
+    - name: Check for Windows service ADCS
+      ansible.windows.win_service:
+        name: certsvc
+      register: adcs
+
+    - name: Build host specific collectors based on service status
+      ansible.builtin.set_fact:
+        host_specific_collectors: "{{ [] +
+          (['iis'] if iis.exists and iis.state == 'running' else []) +
+          (['msmq'] if msmq.exists and msmq.state == 'running' else []) +
+          (['ad'] if addc.exists and addc.state == 'running' else []) +
+          (['adcs'] if adcs.exists and adcs.state == 'running' else []) +
+          (['mssql'] if mssql.exists and mssql.state == 'running' else []) }}"
+      register: host_specific_collectors_result
 
 - name: Merge common collectors with host specific collectors identified
   ansible.builtin.set_fact:

@@ -48,6 +48,7 @@
   when:
     - windows_exporter_service.exists
     - windows_exporter_version != installed_exporter_version
+    - windows_exporter_create_uninstall
 
 - name: Include Install
   ansible.builtin.include_tasks:

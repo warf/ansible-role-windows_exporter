@@ -9,9 +9,9 @@ log:
   level: {{ windows_exporter_log_level }}
 
 scrape:
-  timeout-margin: 0.5
-  
+  timeout-margin: {{ windows_exporter_scrape_timeout_margin | default(0.5) }}
+
 telemetry:
   addr: "{{ windows_exporter_listen_address }}:{{ windows_exporter_port }}"
   path: /metrics
-  max-requests: 5
+  max-requests: {{ windows_exporter_telemetry_max_requests | default(5) }}

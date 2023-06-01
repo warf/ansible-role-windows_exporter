@@ -19,7 +19,7 @@
 - name: Download Windows exporter version {{ windows_exporter_version }}
   ansible.windows.win_get_url:
     url: "{{ windows_exporter_download_url }}"
-    dest: "{{ windows_exporter_download_path }}\\windows_exporter_{{ windows_exporter_version }}.msi"
+    dest: "{{ windows_exporter_download_path }}\\windows_exporter_{{ windows_exporter_version }}-{{ windows_exporter_arch }}.msi"
     force: true
   register: download_windows_exporter_msi
   tags:
