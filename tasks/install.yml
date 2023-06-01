@@ -7,8 +7,9 @@
 
 - name: Install Windows exporter version {{ windows_exporter_version }}
   ansible.windows.win_package:
-    path: "{{ windows_exporter_download_path }}\\windows_exporter_{{ windows_exporter_version }}.msi"
+    path: "{{ windows_exporter_download_path }}\\windows_exporter_{{ windows_exporter_version }}-{{ windows_exporter_arch }}.msi"
     state: present
+  ignore_errors: '{{ ansible_check_mode }}'
   when:
     - download_windows_exporter_msi.status_code == 200
   tags:
