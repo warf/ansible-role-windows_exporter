@@ -27,6 +27,5 @@ windows_exporter_download_path: "C:\\Install\\exporters"
 windows_exporter_log_level: "debug"
 windows_exporter_start_mode: "delayed"
 windows_exporter_configure_firewall: true
-
 windows_exporter_create_uninstall: false
 windows_exporter_collect_services: true
