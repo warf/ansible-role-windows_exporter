@@ -1,16 +1,18 @@
 ---
-- name: Initialize empty host specific collectors
+- name: Initialize empty host specific service list
   ansible.builtin.set_fact:
-    host_specific_collectors: []
+    host_specific_service_collectors: []
 
 - name: Collect running services
   when:
-    - windows_exporter_collect_services
+    - windows_exporter_collect_services | bool
   block:
     - name: Check for Windows service IIS
       ansible.windows.win_service:
         name: w3svc
       register: iis
+      # when:
+      #   - ('iis' not in windows_exporter_host_specific_collectors)
 
     - name: Check for Windows service MSMQ
       ansible.windows.win_service:
@@ -31,28 +33,47 @@
       ansible.windows.win_service:
         name: certsvc
       register: adcs
+      # when:
+      #   - ('adcs' not in windows_exporter_host_specific_collectors)
 
     - name: Build host specific collectors based on service status
       ansible.builtin.set_fact:
-        host_specific_collectors: "{{ [] +
+        host_specific_service_collectors: "{{ windows_exporter_host_specific_collectors +
           (['iis'] if iis.exists and iis.state == 'running' else []) +
           (['msmq'] if msmq.exists and msmq.state == 'running' else []) +
           (['ad'] if addc.exists and addc.state == 'running' else []) +
           (['adcs'] if adcs.exists and adcs.state == 'running' else []) +
           (['mssql'] if mssql.exists and mssql.state == 'running' else []) }}"
-      register: host_specific_collectors_result
+      register: host_specific_service_collectors_result
 
-- name: Merge common collectors with host specific collectors identified
+    - name: Merge common collectors with host specific collectors identified
+      ansible.builtin.set_fact:
+        enabled_collectors: "{{ (windows_exporter_common_collectors + host_specific_service_collectors) | sort | unique | join(',') }}"
+
+- name: Merge common collectors with defined host specific collectors
   ansible.builtin.set_fact:
-    enabled_collectors: "{{ (windows_exporter_common_collectors + host_specific_collectors) | join(',') }}"
+    enabled_collectors: "{{ (windows_exporter_common_collectors
+      + windows_exporter_host_specific_collectors) | sort | join(',') }}"
+  when:
+    - not windows_exporter_collect_services
+    - windows_exporter_host_specific_collectors | length > 0
+
+- name: Set common collectors
+  ansible.builtin.set_fact:
+    enabled_collectors: "{{ windows_exporter_common_collectors | sort | join(',') }}"
+  when:
+    - not windows_exporter_collect_services
+    - windows_exporter_host_specific_collectors | length == 0
 
 - name: Print collectors to be enabled
   ansible.builtin.debug:
     msg:
       - >-
-        {% if host_specific_collectors_result | length == 0 %}
-        Host specific collector(s) identified: None
-        {% else %}
-        Host specific collector(s) identified: {{ host_specific_collectors | join(',') }}
+        {% if host_specific_service_collectors_result | length == 0 -%}
+        Host specific service collector(s) identified: None
+        {% elif windows_exporter_collect_services -%}
+        Host specific collector(s) identified: {{ host_specific_service_collectors | sort | join(',') }}
+        {% else -%}
+        Host specific collector(s) defined: {{ windows_exporter_host_specific_collectors | sort | join(',') }}
         {% endif %}
       - 'Collectors to be enabled: {{ enabled_collectors }}'
