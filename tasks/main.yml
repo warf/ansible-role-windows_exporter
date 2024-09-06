@@ -13,8 +13,10 @@
   register: windows_exporter_service
   ignore_errors: true
 
-- block:
-    - name: Get installed windows exporter version
+- name: Get installed windows exporter version
+  when: windows_exporter_service.exists
+  block:
+    - name: Get installed windows exporter version | Run command
       ansible.windows.win_shell: '.\windows_exporter.exe --version'
       args:
         chdir: "{{ windows_exporter_install_path }}"
@@ -25,7 +27,6 @@
     - name: Get installed windows exporter version | Set version fact
       ansible.builtin.set_fact:
         installed_exporter_version: "{{ exporter_output.stderr | regex_search('\\d+\\.\\d+\\.\\d+') }}"
-  when: windows_exporter_service.exists
 
 - name: Print exporter version identified
   ansible.builtin.debug:
@@ -59,10 +60,11 @@
   ansible.builtin.include_tasks:
     file: configure.yml
 
-- name: Check if Windows Exporter responding to requests → http://{{ ansible_host }}:{{ windows_exporter_port }}
+- name: Check if Windows Exporter responding to requests
   ansible.windows.win_uri:
-    url: "http://{{ ansible_host }}:{{ windows_exporter_port }}"
-    return_content: true
-  register: windows_exporter_http_request
-  failed_when: "'Metrics' not in windows_exporter_http_request.content"
+    url: "http://{{ ansible_host }}:{{ windows_exporter_port }}/metrics"
+    return_content: false
+    status_code: 200
+  # register: windows_exporter_http_request
+  # failed_when: "'Metrics' not in windows_exporter_http_request.content"
   when: windows_exporter_start_mode not in ['disabled', 'manual']
