@@ -65,6 +65,4 @@
     url: "http://{{ ansible_host }}:{{ windows_exporter_port }}/metrics"
     return_content: false
     status_code: 200
-  # register: windows_exporter_http_request
-  # failed_when: "'Metrics' not in windows_exporter_http_request.content"
   when: windows_exporter_start_mode not in ['disabled', 'manual']
