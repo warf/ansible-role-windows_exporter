@@ -1,5 +1,5 @@
 ---
-- name: Check {{ windows_exporter_download_path }} exists
+- name: Check if directory to store msi file exists
   ansible.windows.win_stat:
     path: "{{ windows_exporter_download_path }}"
   register: check_windows_exporter_download_path
@@ -7,7 +7,7 @@
     - download_msi
     - install
 
-- name: Create {{ windows_exporter_download_path }} directory to store msi file
+- name: Create directory to store msi file
   ansible.windows.win_file:
     path: "{{ windows_exporter_download_path }}"
     state: directory
