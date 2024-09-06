@@ -11,8 +11,6 @@
       ansible.windows.win_service:
         name: w3svc
       register: iis
-      # when:
-      #   - ('iis' not in windows_exporter_host_specific_collectors)
 
     - name: Check for Windows service MSMQ
       ansible.windows.win_service:
@@ -33,8 +31,6 @@
       ansible.windows.win_service:
         name: certsvc
       register: adcs
-      # when:
-      #   - ('adcs' not in windows_exporter_host_specific_collectors)
 
     - name: Build host specific collectors based on service status
       ansible.builtin.set_fact:
