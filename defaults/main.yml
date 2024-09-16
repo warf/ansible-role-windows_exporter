@@ -18,6 +18,13 @@ windows_exporter_arch: "amd64"
 windows_exporter_download_url: "https://github.com/prometheus-community/windows_exporter/releases/\
   download/v{{ windows_exporter_version }}/\
   windows_exporter-{{ windows_exporter_version }}-{{ windows_exporter_arch }}.msi"
+### Optional
+# windows_exporter_download_user:
+# windows_exporter_download_pass:
+### Optional
+# windows_exporter_download_proxy: 'http://www-proxy.local:8080'
+# windows_exporter_download_proxy_user:
+# windows_exporter_download_proxy_pass:
 windows_exporter_service_name: "windows_exporter"
 windows_exporter_listen_address: "0.0.0.0"
 windows_exporter_port: "9182"
