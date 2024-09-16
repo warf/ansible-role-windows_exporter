@@ -21,6 +21,12 @@
     url: "{{ windows_exporter_download_url }}"
     dest: "{{ windows_exporter_download_path }}\\windows_exporter_{{ windows_exporter_version }}-{{ windows_exporter_arch }}.msi"
     force: true
+    follow_redirects: all
+    url_username: "{{ windows_exporter_download_user | default(omit) }}"
+    url_password: "{{ windows_exporter_download_pass | default(omit) }}"
+    proxy_url: "{{ windows_exporter_download_proxy | default(omit) }}"
+    proxy_username: "{{ windows_exporter_download_proxy_user | default(omit) }}"
+    proxy_password: "{{ windows_exporter_download_proxy_pass | default(omit) }}"
   register: download_windows_exporter_msi
   tags:
     - download_msi
